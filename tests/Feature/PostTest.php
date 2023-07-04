@@ -5,6 +5,8 @@ namespace Tests\Feature;
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Post;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Testing\File;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class PostTest extends TestCase
@@ -16,10 +18,14 @@ class PostTest extends TestCase
     {
         $this->withoutExceptionHandling();
 
+        Storage::fake('local');
+
+        $file = File::create('my_image.jpeg');
+
         $data = [
             'title' => 'Some title',
             'description' => 'Description',
-            'image' => '123'
+            'image' => $file
         ];
 
         $res = $this->post('/posts', $data);
@@ -32,7 +38,10 @@ class PostTest extends TestCase
 
         $this->assertEquals($data['title'], $post->title);
         $this->assertEquals($data['description'], $post->description);
-        $this->assertEquals($data['image'], $post->image_url);
+
+        $this->assertEquals('images/' . $file->hashName(), $post->image_url);
+
+        Storage::disk('local')->assertExists($post->image_url);
 
     }
 
