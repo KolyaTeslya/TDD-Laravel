@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 // use Illuminate\Foundation\Testing\RefreshDatabase;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Testing\File;
@@ -133,11 +134,29 @@ class PostTest extends TestCase
         $res->assertSeeText('Show page');
         $res->assertSeeText($post->title);
         $res->assertSeeText($post->description);
-
     }
 
+    /** @test */
+    public function a_post_can_be_deleted_by_auth_user()
+    {
+        $this->withoutExceptionHandling();
 
+        $user = User::factory()->create();
+        $post =Post::factory()->create();
+        $res = $this->actingAs($user)->delete('/posts/' . $post->id);
 
+        $res->assertOk();
 
+        $this->assertDatabaseCount('posts', 0);
+    }
 
+    /** @test */
+    public function a_post_can_be_deleted_by_only_auth_user()
+    {
+        $post =Post::factory()->create();
+        $res = $this->delete('/posts/' . $post->id);
+        $res->assertRedirect();
+
+        $this->assertDatabaseCount('posts',1);
+    }
 }

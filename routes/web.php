@@ -27,6 +27,8 @@ Route::post('/posts', [\App\Http\Controllers\PostController::class, 'store']);
 Route::get('/posts/{post}', [\App\Http\Controllers\PostController::class, 'show']);
 Route::patch('/posts/{post}', [\App\Http\Controllers\PostController::class, 'update']);
 
+Route::delete('/posts/{post}', [\App\Http\Controllers\PostController::class, 'destroy'])->middleware('auth');
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
